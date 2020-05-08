@@ -1,12 +1,15 @@
 import asyncio
 import json
-from base64 import b64encode
+import io
+import threading
+from base64 import b64encode, b64decode
 from concurrent.futures import ThreadPoolExecutor
 
 import websockets
 from aioconsole import aprint
 
-from listener import listen_for_speech
+from listen import listen_for_speech
+from playback import play_wav_file
 
 SELF_ID = 'hello123'
 
@@ -16,6 +19,24 @@ async def loop_receive_action(websocket: websockets.WebSocketClientProtocol):
         msg = await websocket.recv()
         payload = json.loads(msg)
         await aprint(payload)
+
+        # TODO: 提取 action 处理逻辑
+        action = payload['action']
+        params = payload['params']
+        if action == 'send':
+            for seg in params['message']:
+                if seg['type'] != 'record':
+                    continue
+                speech_base64 = seg['data'].get('base64')
+                if not speech_base64:
+                    continue
+                # TODO: 需要能够放到一半停(可以用一个线程不断播放, 其它线程往里面喂 data frame 即可)
+                wav_file_data = b64decode(speech_base64)
+                t = threading.Thread(target=play_wav_file,
+                                     args=(io.BytesIO(wav_file_data),))
+                t.start()
+                break
+
         await websocket.send(json.dumps({
             'status': 'ok',
             'data': None,

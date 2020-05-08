@@ -106,12 +106,13 @@ def bytes_to_wav(data: bytes, audio: pyaudio.PyAudio) -> bytes:
     wf.writeframes(data)
     wf.close()
 
-    wav_file = io.BytesIO(wav_file.getvalue())
-    seg = pydub.AudioSegment.from_file(wav_file)
-    seg = seg.set_frame_rate(OUTPUT_RATE)
+    if INPUT_RATE != OUTPUT_RATE:
+        wav_file = io.BytesIO(wav_file.getvalue())
+        seg = pydub.AudioSegment.from_file(wav_file)
+        seg = seg.set_frame_rate(OUTPUT_RATE)
+        wav_file = io.BytesIO()
+        seg.export(wav_file, format='wav')
 
-    wav_file = io.BytesIO()
-    seg.export(wav_file, format='wav')
     return wav_file.getvalue()
 
 
@@ -119,9 +120,9 @@ if __name__ == '__main__':
     import time
 
     # test_silence_intensity()
-    while True:
-        data = listen_for_speech()
-
-        filename = f'output_{str(int(time.time()))}'
-        with open(f'{filename}.wav', 'wb') as f:
-            f.write(data)
+    # while True:
+    #     data = listen_for_speech()
+    #
+    #     filename = f'output_{str(int(time.time()))}'
+    #     with open(f'{filename}.wav', 'wb') as f:
+    #         f.write(data)
