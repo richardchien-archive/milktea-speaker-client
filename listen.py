@@ -47,7 +47,7 @@ def test_silence_intensity(num_samples: int = 50):
 
 def listen_for_speech(silence_limit_sec: float = 1.0,
                       prev_audio_sec: float = 0.5,
-                      intensity_threshold: float = 200.0) -> bytes:
+                      intensity_threshold: float = 70.0) -> bytes:
     """
     监听麦克风, 一旦有语音, 就开始录音, 直到语音结束.
 
@@ -119,7 +119,7 @@ def bytes_to_wav(data: bytes, audio: pyaudio.PyAudio) -> bytes:
 if __name__ == '__main__':
     import time
 
-    # test_silence_intensity()
+    test_silence_intensity()
     # while True:
     #     data = listen_for_speech()
     #
