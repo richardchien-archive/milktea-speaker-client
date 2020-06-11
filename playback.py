@@ -1,13 +1,22 @@
+import io
 import wave
 from typing import Any
 
 import pyaudio
+import pydub
 
 CHUNK = 1024
+OUTPUT_RATE = 44100
 
 
 def play_wav_file(file: Any):
-    wf = wave.open(file, 'rb')
+    seg = pydub.AudioSegment.from_file(file)
+    seg = seg.set_frame_rate(OUTPUT_RATE)
+    wav_file = io.BytesIO()
+    seg.export(wav_file, format='wav')
+
+    wav_file = io.BytesIO(wav_file.getvalue())
+    wf = wave.open(wav_file, 'rb')
 
     # create an audio object
     p = pyaudio.PyAudio()
@@ -30,3 +39,9 @@ def play_wav_file(file: Any):
     # cleanup stuff.
     stream.close()
     p.terminate()
+
+
+if __name__ == '__main__':
+    import sys
+
+    play_wav_file(sys.argv[1])
